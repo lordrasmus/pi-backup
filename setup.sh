@@ -40,13 +40,6 @@ echo "📂 Entpacke Archiv nach $DOWNLOAD_DIR..."
 tar -xzf "$ARCHIVE_PATH" -C "$DOWNLOAD_DIR" --strip-components=1
 
 
-# 🔧 Udev-Regel löschen falls vorhanden
-if [ -e "/etc/udev/rules.d/99-rpi-usb-backup.rules"; ] then
-    rm "/etc/udev/rules.d/99-rpi-usb-backup.rules"
-    udevadm control --reload-rules
-    echo "✅ Udev-Regel erfolgreich entfernt."
-fi
-
 # 🔗 Symlink für run-last-pi-backup.sh anlegen
 echo "🔗 Erstelle Symlink für run-last-pi-backup.sh in /usr/local/bin"
 ln -sf "$DOWNLOAD_DIR/run-last-pi-backup.sh" /usr/local/bin/run-last-pi-backup.sh
