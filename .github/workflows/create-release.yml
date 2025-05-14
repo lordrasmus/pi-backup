@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'  # reagiert auf Tags wie v0.1, v1.0.0, v2.3.4 etc.
 
+
+permissions:
+  contents: write  # <- Wichtig! Gibt dem Token Schreibrechte für Releases
+
+
 jobs:
   release:
     runs-on: ubuntu-latest
