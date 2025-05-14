@@ -12,15 +12,18 @@ DATE=$(date +'%Y-%m-%d_%H-%M')
 IMG_EXT="xz"          # Standard Dateiendung
 MOUNT_POINT="/mnt/backup"
 
+
+USBDEV="${1:-/dev/sda1}"
+
 IS_UDEV=false
 if ! tty &>/dev/null; then
     IS_UDEV=true
     LOGFILE="/tmp/rpi-backup-$DATE.log"
     exec > "$LOGFILE" 2>&1
-    echo "🔧 Script gestartet durch udev am $(date)"
+    echo "🔧 Script gestartet durch udev am $(date) -> $1"
 fi
 
-USBDEV="${1:-/dev/sda1}"
+
 
 # ----------- 🔒 Sicherheitsprüfungen -----------
 
