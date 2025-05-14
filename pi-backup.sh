@@ -120,7 +120,7 @@ if [[ "$PI_MODEL" =~ ^([0-9a-f]{4})$ ]]; then
             ;;
     esac
 else
-    echo "❌ Fehler beim Erkennen des Pi-Modells!"
+    echo "❌ Fehler beim Erkennen des Pi-Modells! $PI_MODEL"
     exit 1
 fi
 
