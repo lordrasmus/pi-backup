@@ -52,43 +52,6 @@ echo "🔗 Erstelle Symlink für run-last-pi-backup.sh in /usr/local/bin"
 ln -sf "$DOWNLOAD_DIR/run-last-pi-backup.sh" /usr/local/bin/run-last-pi-backup.sh
 
 
-
-# ----------- 🔍 Abhängigkeiten prüfen -----------
-
-declare -A CMD_TO_PACKAGE=(
-    [pv]=pv
-    [xz]=xz-utils
-    [dd]=coreutils
-    [mount]=mount
-    [umount]=mount
-    [blkid]=util-linux
-    [mkfs.exfat]=exfatprogs
-    [mail]=mailutils
-    [df]=coreutils
-    [find]=findutils
-    [stat]=coreutils
-)
-
-MISSING_CMDS=()
-APT_PACKAGES=()
-
-for cmd in "${!CMD_TO_PACKAGE[@]}"; do
-    if ! command -v "$cmd" &>/dev/null; then
-        MISSING_CMDS+=("$cmd")
-        APT_PACKAGES+=("${CMD_TO_PACKAGE[$cmd]}")
-    fi
-done
-
-if [ "${#MISSING_CMDS[@]}" -gt 0 ]; then
-    echo "❌ Folgende benötigte Programme fehlen:"
-    for cmd in "${MISSING_CMDS[@]}"; do
-        echo "   - $cmd"
-    done
-    echo ""
-    echo "👉 Installiere sie mit:"
-    echo "    sudo apt update && sudo apt install ${APT_PACKAGES[*]}"
-    exit 1
-fi
-
+/usr/local/bin/run-last-pi-backup.sh --update
 
 echo "🎉 Setup abgeschlossen."

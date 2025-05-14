@@ -39,14 +39,13 @@ fi
 
 # ----------- 💾 Dateisystem prüfen/formatieren -----------
 
-FSTYPE=$(blkid -s TYPE -o value "$USBDEV" || echo "unknown")
-
-if [ "$FSTYPE" != "exfat" ]; then
-    echo "📁 Dateisystem ist '$FSTYPE' – formatiere $USBDEV als exFAT..."
-    umount "$USBDEV" 2>/dev/null || true
-    mkfs.exfat -n BACKUP "$USBDEV"
-    sleep 1
-fi
+#FSTYPE=$(blkid -s TYPE -o value "$USBDEV" || echo "unknown")
+#if [ "$FSTYPE" != "exfat" ]; then
+#    echo "📁 Dateisystem ist '$FSTYPE' – formatiere $USBDEV als exFAT..."
+#    umount "$USBDEV" 2>/dev/null || true
+#    mkfs.exfat -n BACKUP "$USBDEV"
+#    sleep 1
+#fi
 
 # ----------- 🔐 Clean Exit sichern -----------
 

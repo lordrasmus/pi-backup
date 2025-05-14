@@ -72,10 +72,7 @@ fi
 
 SCRIPT_PATH="$DOWNLOAD_DIR/$SCRIPT_NAME"
 
-if [ ! -f "$SCRIPT_PATH" ]; then
-    echo "❌ Script $SCRIPT_NAME wurde im Archiv nicht gefunden."
-    exit 1
-fi
+
 
 
 # 🔧 Udev-Regel löschen falls vorhanden
@@ -85,6 +82,7 @@ if [ -e "/etc/udev/rules.d/$UDEV_RULE_NAME" ] ; then
     echo "✅ Udev-Regel erfolgreich entfernt."
 fi
 
+/usr/local/pi-backup/install-deps.sh
 
 if ! cmp -s "/usr/local/pi-backup/usb-watcher.py" "/usr/local/pi-backup/usb-watcher-run.py"; then
     echo "📄 Neue Version des usb-watcher.py gefunden, aktualisiere.."
@@ -100,8 +98,12 @@ if ! cmp -s "/usr/local/pi-backup/usb-watcher.service" "/etc/systemd/system/usb-
     cp "/usr/local/pi-backup/usb-watcher.service" "/etc/systemd/system/"
     systemctl daemon-reload
     systemctl restart usb-watcher
-    systemctl enable usb-watcher
     echo "✅ USB Watcher Service erfolgreich aktualisiert."
+fi
+
+if [ ! -e /etc/systemd/system/multi-user.target.wants/usb-watcher.service ] ; then
+    systemctl enable usb-watcher
+    echo "✅ USB Watcher Service erfolgreich aktiviert."
 fi
 
 
