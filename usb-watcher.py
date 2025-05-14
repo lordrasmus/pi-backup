@@ -17,7 +17,6 @@ for device in iter(monitor.poll, None):
         
         #SUBSYSTEM=="block", ENV{ID_USB_DRIVER}=="usb-storage", ENV{DEVTYPE}=="partition", RUN+="/usr/local/bin/rpi-usb-backup.sh %E{DEVNAME} &"
 
-
         if device.get('ID_BUS') == 'usb' and device.device_node and device.device_node[-1].isdigit():
             devnode = device.device_node
             print(f"📦 USB-Stick erkannt: {devnode}")
