@@ -49,7 +49,7 @@ fi
 
 trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true' EXIT
 
-echo "🔌 Mounting..."; "$USBDEV -> $MOUNT_POINT"
+echo "🔌 Mounting... $USBDEV -> $MOUNT_POINT"
 mkdir -p "$MOUNT_POINT"
 mount "$USBDEV" "$MOUNT_POINT"
 
