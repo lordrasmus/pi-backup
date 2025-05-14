@@ -40,23 +40,26 @@ if [ -z "$TAG" ]; then
     
 else
 
-    # 🧹 Aufräumen: Alte Dateien entfernen
-    #echo "🧹 Räume alte Dateien auf..."
-    #rm -rf "$DOWNLOAD_DIR"/*
+    CUR_VERS=$(cat $DOWNLOAD_DIR/vers)
+    
+    if [[ ! $CUR_VERS == $TAG ]] ; then
 
-    # 📥 Archiv-Download
-    TARBALL_URL="https://github.com/$GITHUB_USER/$REPO_NAME/archive/refs/tags/$TAG.tar.gz"
-    ARCHIVE_PATH="/tmp/${REPO_NAME}-${TAG}.tar.gz"
+        # 📥 Archiv-Download
+        TARBALL_URL="https://github.com/$GITHUB_USER/$REPO_NAME/archive/refs/tags/$TAG.tar.gz"
+        ARCHIVE_PATH="/tmp/${REPO_NAME}-${TAG}.tar.gz"
 
-    echo "⬇️ Lade Release-Archiv: $TARBALL_URL"
-    curl -sSL "$TARBALL_URL" -o "$ARCHIVE_PATH"
+        echo "⬇️ Lade Release-Archiv: $TARBALL_URL"
+        curl -sSL "$TARBALL_URL" -o "$ARCHIVE_PATH"
 
-    # 📂 Entpacken direkt in das Zielverzeichnis
-    echo "📂 Entpacke Archiv..."
-    tar -xzf "$ARCHIVE_PATH" -C "$DOWNLOAD_DIR" --strip-components=1
+        # 📂 Entpacken direkt in das Zielverzeichnis
+        echo "📂 Entpacke Archiv..."
+        tar -xzf "$ARCHIVE_PATH" -C "$DOWNLOAD_DIR" --strip-components=1
 
-    # 🧹 Temporäres Archiv entfernen
-    rm -f "$ARCHIVE_PATH"
+        # 🧹 Temporäres Archiv entfernen
+        rm -f "$ARCHIVE_PATH"
+        
+        echo $TAG > $DOWNLOAD_DIR/vers
+    fi
 fi
 
 
