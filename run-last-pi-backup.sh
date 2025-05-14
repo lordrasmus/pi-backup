@@ -7,6 +7,12 @@ REPO_NAME="pi-backup"
 SCRIPT_NAME="pi-backup.sh"
 DOWNLOAD_DIR="/usr/local/pi-backup"
 
+# 🛡️ Warnung, wenn nicht als Root ausgeführt
+if [[ "$EUID" -ne 0 ]]; then
+    echo "❌ Dieses Setup muss mit Root-Rechten ausgeführt werden (z. B. per: sudo run-last-pi-backup.sh )."
+    exit 1
+fi
+
 # 📁 Zielverzeichnis erstellen, falls nötig
 if [ ! -d "$DOWNLOAD_DIR" ]; then
     echo "📁 Erstelle Verzeichnis $DOWNLOAD_DIR..."
