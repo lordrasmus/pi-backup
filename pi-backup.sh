@@ -42,7 +42,7 @@ fi
 
 SRCDEV="/dev/mmcblk0"
 DATE=$(date +'%Y-%m-%d_%H-%M')
-IMG_FILE="rpi-backup-$DATE.img.xz"
+IMG_EXT="xz"          # Standard Dateiendung
 MOUNT_POINT="/mnt/backup"
 
 IS_UDEV=false
@@ -89,22 +89,30 @@ DEST_PATH="$MOUNT_POINT/$IMG_FILE"
 
 # ----------- 🚀 Backup starten -----------
 
-# 📜 Modell des Raspberry Pi erkennen und Kompressionsstufe setzen
+# 📜 Modell des Raspberry Pi erkennen und Kompression festlegen
 PI_MODEL=$(cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}')
+COMPRESSION_TYPE="xz"  # Standard: xz
+IMG_EXT="xz"          # Standard Dateiendung
 
-# Festlegen der Kompressionsstufe je nach Modell
+# Festlegen der Kompression je nach Modell
 if [[ "$PI_MODEL" =~ ^([0-9a-f]{4})$ ]]; then
     case "$PI_MODEL" in
         # Raspberry Pi 1 Modelle
         "0002"|"0003"|"0004"|"0005"|"0006"|"0007"|"0008"|"0009"|"0010"|"0011"|"0012"|"0013"|"0014"|"0015"|"0016"|"0017"|"0018"|"0019"|"001a"|"001b"|"001c"|"001d"|"001e"|"001f")
-            COMPRESSION_LEVEL="3"  # Pi 1
+            echo "🔍 Raspberry Pi 1 erkannt, verwende gzip für bessere Performance"
+            COMPRESSION_TYPE="gzip"
+            IMG_EXT="gz"
             ;;
         # Raspberry Pi 4 und neuere Modelle (z.B. 4B, 400, CM4)
         "a02082"|"a020a0"|"a03111"|"a03140"|"a22082"|"a220a0"|"a03130")
-            COMPRESSION_LEVEL="5"  # Pi 4 oder neuer
+            echo "🔍 Raspberry Pi 4 oder neuer erkannt, verwende xz für beste Kompression"
+            COMPRESSION_TYPE="xz"
+            COMPRESSION_LEVEL="5"
             ;;
         *)
-            COMPRESSION_LEVEL="5"  # Standardmäßig 5 für neuere Modelle
+            echo "🔍 Unbekanntes Pi-Modell, verwende xz mit Standard-Einstellungen"
+            COMPRESSION_TYPE="xz"
+            COMPRESSION_LEVEL="5"
             ;;
     esac
 else
@@ -112,14 +120,26 @@ else
     exit 1
 fi
 
+# Backup-Dateiname mit korrekter Endung
+IMG_FILE="rpi-backup-$DATE.img.$IMG_EXT"
+DEST_PATH="$MOUNT_POINT/$IMG_FILE"
+
 DEVICE_SIZE=$(blockdev --getsize64 "$SRCDEV")
 DEVICE_SIZE_MB=$((DEVICE_SIZE / 1024 / 1024))
 echo "📦 Backup von $SRCDEV (${DEVICE_SIZE_MB} MB) → $DEST_PATH"
 
 if [ "$IS_UDEV" = false ]; then
-    pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | xz -z -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+    if [ "$COMPRESSION_TYPE" = "xz" ]; then
+        pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | xz -z -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+    else
+        pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | gzip -c > "$DEST_PATH"
+    fi
 else
-    dd if="$SRCDEV" bs=4M status=none | xz -z -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+    if [ "$COMPRESSION_TYPE" = "xz" ]; then
+        dd if="$SRCDEV" bs=4M status=none | xz -z -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+    else
+        dd if="$SRCDEV" bs=4M status=none | gzip -c > "$DEST_PATH"
+    fi
 fi
 
 # ----------- 📊 Backup-Infos -----------
@@ -136,12 +156,12 @@ echo "📉 Kompression: $(awk "BEGIN {printf \"%.2f\", 100 * $RATIO}") % der Ori
 
 echo ""
 echo "🧹 Entferne Backups älter als 60 Tage..."
-find "$MOUNT_POINT" -name "rpi-backup-*.img.xz" -type f -mtime +60 -exec rm -v {} \;
+find "$MOUNT_POINT" -name "rpi-backup-*.img.*" -type f -mtime +60 -exec rm -v {} \;
 
 # ----------- 📊 Status anzeigen -----------
 
 FREI_MB=$(df -m "$MOUNT_POINT" | awk 'NR==2 {print $4}')
-BACKUP_COUNT=$(find "$MOUNT_POINT" -name "rpi-backup-*.img.xz" -type f | wc -l)
+BACKUP_COUNT=$(find "$MOUNT_POINT" -name "rpi-backup-*.img.*" -type f | wc -l)
 echo ""
 echo "📊 Backups auf USB-Stick: $BACKUP_COUNT"
 echo "💾 Freier Speicher: ${FREI_MB} MB"
