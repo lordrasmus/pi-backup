@@ -74,8 +74,6 @@ if [ -f "$DOWNLOAD_DIR/$UDEV_RULE_NAME" ]; then
         cp "$DOWNLOAD_DIR/$UDEV_RULE_NAME" /etc/udev/rules.d/
         udevadm control --reload-rules
         echo "✅ Udev-Regel erfolgreich aktualisiert."
-    else
-        echo "ℹ️ Udev-Regel ist bereits aktuell."
     fi
 else
     echo "⚠️ Udev-Regel $UDEV_RULE_NAME nicht im Release gefunden."

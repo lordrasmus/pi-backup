@@ -120,8 +120,10 @@ if [[ "$PI_MODEL" =~ ^([0-9a-f]{4})$ ]]; then
             ;;
     esac
 else
-    echo "❌ Fehler beim Erkennen des Pi-Modells! $PI_MODEL"
-    exit 1
+    echo "❌ Fehler beim Erkennen des Pi-Modells! $PI_MODEL. using default settings"
+    COMPRESSION_TYPE="xz"
+    COMPRESSION_LEVEL="5"
+    IMG_EXT="xz"
 fi
 
 # Backup-Dateiname mit korrekter Endung
