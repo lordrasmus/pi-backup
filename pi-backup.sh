@@ -156,17 +156,19 @@ else
             dd if="$SRCDEV" bs=4M status=none | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
         fi
     fi
+
+
+    # ----------- 📊 Backup-Infos -----------
+
+    FINAL_SIZE=$(stat --printf="%s" "$DEST_PATH")
+    FINAL_SIZE_MB=$((FINAL_SIZE / 1024 / 1024))
+    RATIO=$(awk "BEGIN {printf \"%.2f\", $FINAL_SIZE / $DEVICE_SIZE}")
+
+    echo "✅ Backup abgeschlossen: $DEST_PATH"
+    echo "📦 Größe: ${FINAL_SIZE_MB} MB"
+    echo "📉 Kompression: $(awk "BEGIN {printf \"%.2f\", 100 * $RATIO}") % der Originalgröße"
+
 fi
-
-# ----------- 📊 Backup-Infos -----------
-
-FINAL_SIZE=$(stat --printf="%s" "$DEST_PATH")
-FINAL_SIZE_MB=$((FINAL_SIZE / 1024 / 1024))
-RATIO=$(awk "BEGIN {printf \"%.2f\", $FINAL_SIZE / $DEVICE_SIZE}")
-
-echo "✅ Backup abgeschlossen: $DEST_PATH"
-echo "📦 Größe: ${FINAL_SIZE_MB} MB"
-echo "📉 Kompression: $(awk "BEGIN {printf \"%.2f\", 100 * $RATIO}") % der Originalgröße"
 
 # ----------- 🧹 Alte Backups löschen -----------
 
