@@ -62,6 +62,8 @@ else
         rm -f "$ARCHIVE_PATH"
         
         echo $TAG > $DOWNLOAD_DIR/vers
+    else
+        echo "📂 Version : $CUR_VERS"
     fi
 fi
 

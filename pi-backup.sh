@@ -131,16 +131,16 @@ DEVICE_SIZE_MB=$((DEVICE_SIZE / 1024 / 1024))
 echo "📦 Backup von $SRCDEV (${DEVICE_SIZE_MB} MB) → $DEST_PATH"
 
 if [ "$IS_UDEV" = false ]; then
-    if [ "$COMPRESSION_TYPE" = "xz" ]; then
-        pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
-    else
+    if [ "$COMPRESSION_TYPE" = "gzip" ]; then
         pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
+    else
+        pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
     fi
 else
-    if [ "$COMPRESSION_TYPE" = "xz" ]; then
-        dd if="$SRCDEV" bs=4M status=none | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
-    else
+    if [ "$COMPRESSION_TYPE" = "gzip" ]; then
         dd if="$SRCDEV" bs=4M status=none | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
+    else
+        dd if="$SRCDEV" bs=4M status=none | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
     fi
 fi
 
