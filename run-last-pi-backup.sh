@@ -89,15 +89,18 @@ fi
 if ! cmp -s "/usr/local/pi-backup/usb-watcher.py" "/usr/local/pi-backup/usb-watcher-run.py"; then
     echo "📄 Neue Version des usb-watcher.py gefunden, aktualisiere.."
     cp "/usr/local/pi-backup/usb-watcher.py" "/usr/local/pi-backup/usb-watcher-run.py"
-    systemctl restart usb-watcher
+    if [ -e /etc/systemd/system/usb-watcher.service ] ; then
+        systemctl restart usb-watcher
+    fi
     echo "✅ USB Watcher Daemon erfolgreich aktualisiert."
 fi
 
-if ! cmp -s "/usr/local/pi-backup/usb-watcher.service" "/etc/systemd/system/"; then
+if ! cmp -s "/usr/local/pi-backup/usb-watcher.service" "/etc/systemd/system/usb-watcher.service"; then
     echo "📄 Neue Version des usb-watcher.service gefunden, aktualisiere/"
     cp "/usr/local/pi-backup/usb-watcher.service" "/etc/systemd/system/"
     systemctl daemon-reload
     systemctl restart usb-watcher
+    systemctl enable usb-watcher
     echo "✅ USB Watcher Service erfolgreich aktualisiert."
 fi
 
