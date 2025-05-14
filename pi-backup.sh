@@ -106,7 +106,7 @@ if [[ "$PI_MODEL" =~ ^([0-9a-f]{4})$ ]]; then
             IMG_EXT="gz"
             ;;
         # Raspberry Pi 4 und neuere Modelle (z.B. 4B, 400, CM4)
-        "a02082"|"a020a0"|"a03111"|"a03140"|"a22082"|"a220a0"|"a03130")
+        "a02082"|"a020a0"|"a03111"|"a03140"|"a22082"|"a220a0"|"a03130"|"c03131")
             echo "🔍 Raspberry Pi 4 oder neuer erkannt, verwende xz für beste Kompression"
             COMPRESSION_TYPE="xz"
             COMPRESSION_LEVEL="5"
