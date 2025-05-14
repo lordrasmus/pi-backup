@@ -15,6 +15,8 @@ declare -A CMD_TO_PACKAGE=(
     [find]=findutils
     [stat]=coreutils
     [screen]=screen
+    [nmon]=nmon
+    [ncdu]=ncdu
 )
 
 MISSING_CMDS=()
