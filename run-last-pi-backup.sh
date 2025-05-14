@@ -6,6 +6,7 @@ GITHUB_USER="lordrasmus"
 REPO_NAME="pi-backup"
 SCRIPT_NAME="pi-backup.sh"
 DOWNLOAD_DIR="/usr/local/pi-backup"
+UDEV_RULE_NAME="99-rpi-usb-backup.rules"
 
 # 🛡️ Warnung, wenn nicht als Root ausgeführt
 if [[ "$EUID" -ne 0 ]]; then
@@ -48,6 +49,20 @@ SCRIPT_PATH="$EXTRACTED_DIR/$SCRIPT_NAME"
 if [ ! -f "$SCRIPT_PATH" ]; then
     echo "❌ Script $SCRIPT_NAME wurde im Archiv nicht gefunden."
     exit 1
+fi
+
+# 🔧 Udev-Regel aktualisieren falls geändert
+if [ -f "$EXTRACTED_DIR/$UDEV_RULE_NAME" ]; then
+    if ! cmp -s "$EXTRACTED_DIR/$UDEV_RULE_NAME" "/etc/udev/rules.d/$UDEV_RULE_NAME"; then
+        echo "📄 Neue Version der Udev-Regel gefunden, aktualisiere in /etc/udev/rules.d/"
+        cp "$EXTRACTED_DIR/$UDEV_RULE_NAME" /etc/udev/rules.d/
+        udevadm control --reload-rules
+        echo "✅ Udev-Regel erfolgreich aktualisiert."
+    else
+        echo "ℹ️ Udev-Regel ist bereits aktuell."
+    fi
+else
+    echo "⚠️ Udev-Regel $UDEV_RULE_NAME nicht im Release gefunden."
 fi
 
 chmod +x "$SCRIPT_PATH"
