@@ -98,9 +98,13 @@ case "$PI_MODEL" in
     # Raspberry Pi 1 Modelle
     "0002"|"0003"|"0004"|"0005"|"0006"|"0007"|"0008"|"0009"|"0010"|"0011"|"0012"|"0013"|"0014"|"0015"|"0016"|"0017"|"0018"|"0019"|"001a"|"001b"|"001c"|"001d"|"001e"|"001f")
         echo "🔍 Raspberry Pi 1 erkannt, verwende gzip für bessere Performance"
-        COMPRESSION_TYPE="gzip"
+        #COMPRESSION_TYPE="gzip"
+        #COMPRESSION_LEVEL="1"
+        #IMG_EXT="gz"
+        
+        COMPRESSION_TYPE="zstd"
         COMPRESSION_LEVEL="1"
-        IMG_EXT="gz"
+        IMG_EXT="zstd"
         ;;
     # Raspberry Pi 4 und neuere Modelle (z.B. 4B, 400, CM4)
     "a02082"|"a020a0"|"a03111"|"a03140"|"a22082"|"a220a0"|"a03130"|"c03131")
@@ -110,14 +114,19 @@ case "$PI_MODEL" in
         #IMG_EXT="xz"
         
         COMPRESSION_TYPE="zstd"
-        COMPRESSION_LEVEL="2"
+        COMPRESSION_LEVEL="3"
         IMG_EXT="zstd"
         ;;
     *)
         echo "🔍 Unbekanntes Pi-Modell <$PI_MODEL>, verwende xz mit Standard-Einstellungen"
-        COMPRESSION_TYPE="xz"
-        COMPRESSION_LEVEL="5"
-        IMG_EXT="xz"
+        #COMPRESSION_TYPE="xz"
+        #COMPRESSION_LEVEL="5"
+        #IMG_EXT="xz"
+        
+        COMPRESSION_TYPE="zstd"
+        COMPRESSION_LEVEL="6"
+        IMG_EXT="zstd"
+        
         ;;
 esac
 
@@ -130,17 +139,22 @@ DEVICE_SIZE=$(blockdev --getsize64 "$SRCDEV")
 DEVICE_SIZE_MB=$((DEVICE_SIZE / 1024 / 1024))
 echo "📦 Backup von $SRCDEV (${DEVICE_SIZE_MB} MB) → $DEST_PATH"
 
-if [ "$IS_UDEV" = false ]; then
-    if [ "$COMPRESSION_TYPE" = "gzip" ]; then
-        pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
-    else
-        pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
-    fi
+if [ -e /skip-backup ] ; then
+    echo "⚠️ skip backup"
 else
-    if [ "$COMPRESSION_TYPE" = "gzip" ]; then
-        dd if="$SRCDEV" bs=4M status=none | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
+    if [ "$IS_UDEV" = false ]; then
+    
+        if [ "$COMPRESSION_TYPE" = "gzip" ]; then
+            pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
+        else
+            pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+        fi
     else
-        dd if="$SRCDEV" bs=4M status=none | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+        if [ "$COMPRESSION_TYPE" = "gzip" ]; then
+            dd if="$SRCDEV" bs=4M status=none | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
+        else
+            dd if="$SRCDEV" bs=4M status=none | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+        fi
     fi
 fi
 
