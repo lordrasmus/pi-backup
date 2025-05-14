@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-# ⛔️ Als Root neu starten, wenn nötig
+# 🛡️ Warnung, wenn nicht als Root ausgeführt
 if [[ "$EUID" -ne 0 ]]; then
-    echo "⚠️ Dieses Setup benötigt Root-Rechte. Starte mit sudo neu..."
-    exec sudo "$0" "$@"
+    echo "❌ Dieses Setup muss mit Root-Rechten ausgeführt werden (z. B. per: sudo bash setup.sh oder curl ... | sudo bash)."
+    exit 1
 fi
 
 # 🔧 Konfiguration
