@@ -40,7 +40,10 @@ if [ -z "$TAG" ]; then
     
 else
 
-    CUR_VERS=$(cat $DOWNLOAD_DIR/vers)
+    CUR_VERS=""
+    if [ -e $DOWNLOAD_DIR/vers ] ; then
+        CUR_VERS=$(cat $DOWNLOAD_DIR/vers)
+    fi
     
     if [[ ! $CUR_VERS == $TAG ]] ; then
 
