@@ -91,40 +91,32 @@ DEST_PATH="$MOUNT_POINT/$IMG_FILE"
 
 # 📜 Modell des Raspberry Pi erkennen und Kompression festlegen
 PI_MODEL=$(cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}')
-COMPRESSION_TYPE="xz"  # Standard: xz
-COMPRESSION_LEVEL="6"
-IMG_EXT="xz"          # Standard Dateiendung
+
 
 # Festlegen der Kompression je nach Modell
-if [[ "$PI_MODEL" =~ ^([0-9a-f]{4})$ ]]; then
-    case "$PI_MODEL" in
-        # Raspberry Pi 1 Modelle
-        "0002"|"0003"|"0004"|"0005"|"0006"|"0007"|"0008"|"0009"|"0010"|"0011"|"0012"|"0013"|"0014"|"0015"|"0016"|"0017"|"0018"|"0019"|"001a"|"001b"|"001c"|"001d"|"001e"|"001f")
-            echo "🔍 Raspberry Pi 1 erkannt, verwende gzip für bessere Performance"
-            COMPRESSION_TYPE="gzip"
-            COMPRESSION_LEVEL="1"
-            IMG_EXT="gz"
-            ;;
-        # Raspberry Pi 4 und neuere Modelle (z.B. 4B, 400, CM4)
-        "a02082"|"a020a0"|"a03111"|"a03140"|"a22082"|"a220a0"|"a03130"|"c03131")
-            echo "🔍 Raspberry Pi 4 oder neuer erkannt, verwende xz für beste Kompression"
-            COMPRESSION_TYPE="xz"
-            COMPRESSION_LEVEL="5"
-            IMG_EXT="xz"
-            ;;
-        *)
-            echo "🔍 Unbekanntes Pi-Modell, verwende xz mit Standard-Einstellungen"
-            COMPRESSION_TYPE="xz"
-            COMPRESSION_LEVEL="5"
-            IMG_EXT="xz"
-            ;;
-    esac
-else
-    echo "❌ Fehler beim Erkennen des Pi-Modells! $PI_MODEL. using default settings"
-    COMPRESSION_TYPE="xz"
-    COMPRESSION_LEVEL="5"
-    IMG_EXT="xz"
-fi
+case "$PI_MODEL" in
+    # Raspberry Pi 1 Modelle
+    "0002"|"0003"|"0004"|"0005"|"0006"|"0007"|"0008"|"0009"|"0010"|"0011"|"0012"|"0013"|"0014"|"0015"|"0016"|"0017"|"0018"|"0019"|"001a"|"001b"|"001c"|"001d"|"001e"|"001f")
+        echo "🔍 Raspberry Pi 1 erkannt, verwende gzip für bessere Performance"
+        COMPRESSION_TYPE="gzip"
+        COMPRESSION_LEVEL="1"
+        IMG_EXT="gz"
+        ;;
+    # Raspberry Pi 4 und neuere Modelle (z.B. 4B, 400, CM4)
+    "a02082"|"a020a0"|"a03111"|"a03140"|"a22082"|"a220a0"|"a03130"|"c03131")
+        echo "🔍 Raspberry Pi 4 oder neuer erkannt, verwende xz für beste Kompression"
+        COMPRESSION_TYPE="xz"
+        COMPRESSION_LEVEL="5"
+        IMG_EXT="xz"
+        ;;
+    *)
+        echo "🔍 Unbekanntes Pi-Modell <$PI_MODEL>, verwende xz mit Standard-Einstellungen"
+        COMPRESSION_TYPE="xz"
+        COMPRESSION_LEVEL="5"
+        IMG_EXT="xz"
+        ;;
+esac
+
 
 # Backup-Dateiname mit korrekter Endung
 IMG_FILE="rpi-backup-$DATE.img.$IMG_EXT"
