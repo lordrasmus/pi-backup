@@ -77,17 +77,30 @@ if [ ! -f "$SCRIPT_PATH" ]; then
     exit 1
 fi
 
-# 🔧 Udev-Regel aktualisieren falls geändert
-if [ -f "$DOWNLOAD_DIR/$UDEV_RULE_NAME" ]; then
-    if ! cmp -s "$DOWNLOAD_DIR/$UDEV_RULE_NAME" "/etc/udev/rules.d/$UDEV_RULE_NAME"; then
-        echo "📄 Neue Version der Udev-Regel gefunden, aktualisiere in /etc/udev/rules.d/"
-        cp "$DOWNLOAD_DIR/$UDEV_RULE_NAME" /etc/udev/rules.d/
-        udevadm control --reload-rules
-        echo "✅ Udev-Regel erfolgreich aktualisiert."
-    fi
-else
-    echo "⚠️ Udev-Regel $UDEV_RULE_NAME nicht im Release gefunden."
+
+# 🔧 Udev-Regel löschen falls vorhanden
+if [ -e "/etc/udev/rules.d/$UDEV_RULE_NAME" ] ; then
+    rm "/etc/udev/rules.d/$UDEV_RULE_NAME"
+    udevadm control --reload-rules
+    echo "✅ Udev-Regel erfolgreich entfernt."
 fi
+
+
+if ! cmp -s "/usr/local/pi-backup/usb-watcher.py" "/usr/local/pi-backup/usb-watcher-run.py"; then
+    echo "📄 Neue Version des usb-watcher.py gefunden, aktualisiere.."
+    cp "/usr/local/pi-backup/usb-watcher.py" "/usr/local/pi-backup/usb-watcher-run.py"
+    systemctl restart usb-watcher
+    echo "✅ USB Watcher Daemon erfolgreich aktualisiert."
+fi
+
+if ! cmp -s "/usr/local/pi-backup/usb-watcher.service" "/etc/systemd/system/"; then
+    echo "📄 Neue Version des usb-watcher.service gefunden, aktualisiere/"
+    cp "/usr/local/pi-backup/usb-watcher.service" "/etc/systemd/system/"
+    systemctl daemon-reload
+    systemctl restart usb-watcher
+    echo "✅ USB Watcher Service erfolgreich aktualisiert."
+fi
+
 
 chmod +x "$SCRIPT_PATH"
 
@@ -96,8 +109,4 @@ if [ "$UPDATE_ONLY" = true ]; then
     exit 0
 fi
 
-if ! tty &>/dev/null; then
-    "$SCRIPT_PATH" "$@" &
-else
-    exec "$SCRIPT_PATH" "$@"
-fi
+exec "$SCRIPT_PATH" "$@"

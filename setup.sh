@@ -11,7 +11,6 @@ fi
 GITHUB_USER="lordrasmus"
 REPO_NAME="pi-backup"
 DOWNLOAD_DIR="/usr/local/pi-backup"
-UDEV_RULE_NAME="99-rpi-usb-backup.rules"
 
 # 📁 Zielverzeichnis für Entpacken vorbereiten
 if [ ! -d "$DOWNLOAD_DIR" ]; then
@@ -40,14 +39,12 @@ curl -sSL "$TARBALL_URL" -o "$ARCHIVE_PATH"
 echo "📂 Entpacke Archiv nach $DOWNLOAD_DIR..."
 tar -xzf "$ARCHIVE_PATH" -C "$DOWNLOAD_DIR" --strip-components=1
 
-# 🧩 Udev-Regel installieren
-if [ -f "$DOWNLOAD_DIR/$UDEV_RULE_NAME" ]; then
-    echo "📄 Installiere Udev-Regel nach /etc/udev/rules.d/"
-    cp "$DOWNLOAD_DIR/$UDEV_RULE_NAME" /etc/udev/rules.d/
+
+# 🔧 Udev-Regel löschen falls vorhanden
+if [ -e "/etc/udev/rules.d/99-rpi-usb-backup.rules"; ] then
+    rm "/etc/udev/rules.d/99-rpi-usb-backup.rules"
     udevadm control --reload-rules
-    echo "✅ Udev-Regel erfolgreich installiert."
-else
-    echo "⚠️ Udev-Regel $UDEV_RULE_NAME nicht im Release gefunden."
+    echo "✅ Udev-Regel erfolgreich entfernt."
 fi
 
 # 🔗 Symlink für run-last-pi-backup.sh anlegen
