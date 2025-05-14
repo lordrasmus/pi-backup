@@ -89,14 +89,37 @@ DEST_PATH="$MOUNT_POINT/$IMG_FILE"
 
 # ----------- 🚀 Backup starten -----------
 
+# 📜 Modell des Raspberry Pi erkennen und Kompressionsstufe setzen
+PI_MODEL=$(cat /proc/cpuinfo | grep 'Revision' | awk '{print $3}')
+
+# Festlegen der Kompressionsstufe je nach Modell
+if [[ "$PI_MODEL" =~ ^([0-9a-f]{4})$ ]]; then
+    case "$PI_MODEL" in
+        # Raspberry Pi 1 Modelle
+        "0002"|"0003"|"0004"|"0005"|"0006"|"0007"|"0008"|"0009"|"0010"|"0011"|"0012"|"0013"|"0014"|"0015"|"0016"|"0017"|"0018"|"0019"|"001a"|"001b"|"001c"|"001d"|"001e"|"001f")
+            COMPRESSION_LEVEL="3"  # Pi 1
+            ;;
+        # Raspberry Pi 4 und neuere Modelle (z.B. 4B, 400, CM4)
+        "a02082"|"a020a0"|"a03111"|"a03140"|"a22082"|"a220a0"|"a03130")
+            COMPRESSION_LEVEL="5"  # Pi 4 oder neuer
+            ;;
+        *)
+            COMPRESSION_LEVEL="5"  # Standardmäßig 5 für neuere Modelle
+            ;;
+    esac
+else
+    echo "❌ Fehler beim Erkennen des Pi-Modells!"
+    exit 1
+fi
+
 DEVICE_SIZE=$(blockdev --getsize64 "$SRCDEV")
 DEVICE_SIZE_MB=$((DEVICE_SIZE / 1024 / 1024))
 echo "📦 Backup von $SRCDEV (${DEVICE_SIZE_MB} MB) → $DEST_PATH"
 
 if [ "$IS_UDEV" = false ]; then
-    pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | xz -z -6 -T0 > "$DEST_PATH"
+    pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | xz -z -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
 else
-    dd if="$SRCDEV" bs=4M status=none | xz -z -6 -T0 > "$DEST_PATH"
+    dd if="$SRCDEV" bs=4M status=none | xz -z -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
 fi
 
 # ----------- 📊 Backup-Infos -----------
