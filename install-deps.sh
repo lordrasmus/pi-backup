@@ -14,6 +14,7 @@ declare -A CMD_TO_PACKAGE=(
     [df]=coreutils
     [find]=findutils
     [stat]=coreutils
+    [screen]=screen
 )
 
 MISSING_CMDS=()
