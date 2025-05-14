@@ -105,9 +105,13 @@ case "$PI_MODEL" in
     # Raspberry Pi 4 und neuere Modelle (z.B. 4B, 400, CM4)
     "a02082"|"a020a0"|"a03111"|"a03140"|"a22082"|"a220a0"|"a03130"|"c03131")
         echo "🔍 Raspberry Pi 4 oder neuer erkannt, verwende xz für beste Kompression"
-        COMPRESSION_TYPE="xz"
-        COMPRESSION_LEVEL="5"
-        IMG_EXT="xz"
+        #COMPRESSION_TYPE="xz"
+        #COMPRESSION_LEVEL="5"
+        #IMG_EXT="xz"
+        
+        COMPRESSION_TYPE="zstd"
+        COMPRESSION_LEVEL="2"
+        IMG_EXT="zstd"
         ;;
     *)
         echo "🔍 Unbekanntes Pi-Modell <$PI_MODEL>, verwende xz mit Standard-Einstellungen"
@@ -128,13 +132,13 @@ echo "📦 Backup von $SRCDEV (${DEVICE_SIZE_MB} MB) → $DEST_PATH"
 
 if [ "$IS_UDEV" = false ]; then
     if [ "$COMPRESSION_TYPE" = "xz" ]; then
-        pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | xz -z -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+        pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
     else
         pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
     fi
 else
     if [ "$COMPRESSION_TYPE" = "xz" ]; then
-        dd if="$SRCDEV" bs=4M status=none | xz -z -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+        dd if="$SRCDEV" bs=4M status=none | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
     else
         dd if="$SRCDEV" bs=4M status=none | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
     fi
