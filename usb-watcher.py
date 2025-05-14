@@ -21,5 +21,4 @@ for device in iter(monitor.poll, None):
             devnode = device.device_node
             print(f"📦 USB-Stick erkannt: {devnode}")
 
-            # Starte dein Backup-Script (asynchron!)
-            subprocess.Popen(['/usr/local/pi-backup/pi-backup.sh', devnode], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.Popen(['/usr/local/pi-backup/run-last-pi-backup.sh', devnode], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
