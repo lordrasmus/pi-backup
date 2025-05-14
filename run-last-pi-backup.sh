@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 # 🔧 GitHub-Daten
 GITHUB_USER="lordrasmus"
 REPO_NAME="pi-backup"
