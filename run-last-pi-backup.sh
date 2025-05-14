@@ -95,4 +95,4 @@ if [ "$UPDATE_ONLY" = true ]; then
     echo "✅ Update abgeschlossen."
     exit 0
 fi
-exec "$SCRIPT_PATH" "$@"
+"$SCRIPT_PATH" "$@" &
