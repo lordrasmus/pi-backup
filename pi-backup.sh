@@ -11,6 +11,27 @@ SRCDEV="/dev/mmcblk0"
 DATE=$(date +'%Y-%m-%d_%H-%M')
 MOUNT_POINT="/mnt/backup"
 
+# Parameter verarbeiten
+IS_SYSTEMD=false
+USBDEV="/dev/sda1"  # Standard-Device
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --systemd)
+            IS_SYSTEMD=true
+            ;;
+        /dev/*)
+            USBDEV="$1"
+            ;;
+        *)
+            echo "❌ Unbekannter Parameter: $1"
+            echo "Verwendung: $0 [--systemd] [/dev/sdXY]"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
 # Temporäres Verzeichnis für Logs erstellen
 mkdir -p /tmp/piboot
 mount -t tmpfs -o size=10M tmpfs /tmp/piboot
@@ -25,8 +46,6 @@ echo "🔧 Script gestartet am $(date)"
 
 # Start-Benachrichtigung senden
 "$SCRIPT_DIR/send_log_mail.py" "🔧 Backup gestartet am $(date)"
-
-USBDEV="${1:-/dev/sda1}"
 
 
 
@@ -132,13 +151,15 @@ else
     
     # ----------- 🔒 Setze alle Partitionen auf readonly -----------
     echo "🔒 Setze Partitionen auf readonly..."
-    for part in $(lsblk -n -o NAME $SRCDEV | tail -n +2); do
-        echo "   Setze /dev/$part auf readonly..."
-        mount -o remount,ro "/dev/$part"
+    for mnt in $(findmnt -n -o TARGET $SRCDEV); do
+        if [ "$mnt" != "/tmp/piboot" ]; then
+            echo "   Setze $mnt auf readonly..."
+            mount -o remount,ro "$mnt"
+        fi
     done
 
 
-    if [ "$IS_UDEV" = false ]; then
+    if [ "$IS_SYSTEMD" = false ]; then
     
         if [ "$COMPRESSION_TYPE" = "gzip" ]; then
             pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"

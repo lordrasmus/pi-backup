@@ -21,4 +21,4 @@ for device in iter(monitor.poll, None):
             devnode = device.device_node
             print(f"📦 USB-Stick erkannt: {devnode}")
 
-            subprocess.Popen(['/usr/local/pi-backup/run-last-pi-backup.sh', devnode])
+            subprocess.Popen(['/usr/local/pi-backup/pi-backup.sh --systemd', devnode])
