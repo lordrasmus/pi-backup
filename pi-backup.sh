@@ -9,10 +9,12 @@ SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
 SRCDEV="/dev/mmcblk0"
 DATE=$(date +'%Y-%m-%d_%H-%M')
-IMG_EXT="xz"          # Standard Dateiendung
 MOUNT_POINT="/mnt/backup"
 
-LOGFILE="/tmp/rpi-backup-$DATE.log"
+# Temporäres Verzeichnis für Logs erstellen
+mkdir -p /tmp/piboot
+mount -t tmpfs -o size=10M tmpfs /tmp/piboot
+LOGFILE="/tmp/piboot/rpi-backup-$DATE.log"
 exec > >(tee -a "$LOGFILE") 2>&1
 
 echo ""
@@ -47,9 +49,17 @@ fi
 #    sleep 1
 #fi
 
+
+# ----------- 🔒 Setze alle Partitionen auf readonly -----------
+echo "🔒 Setze Partitionen auf readonly..."
+for part in $(lsblk -n -o NAME $SRCDEV | tail -n +2); do
+    echo "   Setze /dev/$part auf readonly..."
+    mount -o remount,ro "/dev/$part"
+done
+
 # ----------- 🔐 Clean Exit sichern -----------
 
-trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true' EXIT
+trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true; echo "🔄 Starte System neu..."; reboot' EXIT
 
 echo "🔌 Mounting... $USBDEV -> $MOUNT_POINT"
 mkdir -p "$MOUNT_POINT"
