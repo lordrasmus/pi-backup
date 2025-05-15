@@ -81,9 +81,8 @@ fi
 
 
 # ----------- 🔐 Clean Exit sichern -----------
-
-#trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true; if [ ! -e /skip-backup ]; then echo "🔄 Starte System neu..."; reboot; fi' EXIT
-trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true;' EXIT
+trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true; if [ ! -e /skip-backup ]; then echo "🔄 Starte System neu..."; reboot; fi' EXIT
+#trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true;' EXIT
 
 echo "🔌 Mounting... $USBDEV -> $MOUNT_POINT"
 mkdir -p "$MOUNT_POINT"
