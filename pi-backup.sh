@@ -4,21 +4,24 @@ set -e
 
 # ----------- ⚙️ Konfiguration -----------
 
+# Ermittle das Verzeichnis des aktuellen Scripts
+SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
+
 SRCDEV="/dev/mmcblk0"
 DATE=$(date +'%Y-%m-%d_%H-%M')
 IMG_EXT="xz"          # Standard Dateiendung
 MOUNT_POINT="/mnt/backup"
 
+LOGFILE="/tmp/rpi-backup-$DATE.log"
+exec > >(tee -a "$LOGFILE") 2>&1
+
+echo ""
+echo "   PI Backup "$(cat /usr/local/pi-backup/vers) 
+echo ""
+
+echo "🔧 Script gestartet am $(date)"
 
 USBDEV="${1:-/dev/sda1}"
-
-IS_UDEV=false
-if ! tty &>/dev/null; then
-    IS_UDEV=true
-    LOGFILE="/tmp/rpi-backup-$DATE.log"
-    exec > "$LOGFILE" 2>&1
-    echo "🔧 Script gestartet durch udev am $(date) -> $1"
-fi
 
 
 
@@ -113,6 +116,12 @@ echo "📦 Backup von $SRCDEV (${DEVICE_SIZE_MB} MB) → $DEST_PATH"
 if [ -e /skip-backup ] ; then
     echo "⚠️ skip backup"
 else
+    # ----------- 🧹 Alte Backups löschen -----------
+
+    echo ""
+    echo "🧹 Entferne Backups älter als 60 Tage..."
+    find "$MOUNT_POINT" -name "rpi-backup-*.img.*" -type f -mtime +60 -exec rm -v {} \;
+
     if [ "$IS_UDEV" = false ]; then
     
         if [ "$COMPRESSION_TYPE" = "gzip" ]; then
@@ -141,11 +150,7 @@ else
 
 fi
 
-# ----------- 🧹 Alte Backups löschen -----------
 
-echo ""
-echo "🧹 Entferne Backups älter als 60 Tage..."
-find "$MOUNT_POINT" -name "rpi-backup-*.img.*" -type f -mtime +60 -exec rm -v {} \;
 
 # ----------- 📊 Status anzeigen -----------
 
@@ -156,14 +161,13 @@ echo "📊 Backups auf USB-Stick: $BACKUP_COUNT"
 echo "💾 Freier Speicher: ${FREI_MB} MB"
 
 # ----------- 🔐 Unmount vor Log-Versand -----------
-
-umount "$MOUNT_POINT" && echo "✅ USB-Stick ausgehängt."
+#umount "$MOUNT_POINT" && echo "✅ USB-Stick ausgehängt."
 
 # ----------- 📧 Mailversand -----------
 
-if [ "$IS_UDEV" = true ]; then
-    echo ""
-    echo "📧 Sende Logfile an lordrasmus@gmail.com..."
-    mail -s "📦 Raspberry Pi Backup abgeschlossen am $DATE" lordrasmus@gmail.com < "$LOGFILE"
-    rm -f "$LOGFILE"
-fi
+
+
+echo ""
+echo "📧 Sende Logfile ..."
+"$SCRIPT_DIR/send_log_mail.py" "$LOGFILE"
+rm -f "$LOGFILE"
