@@ -21,4 +21,9 @@ for device in iter(monitor.poll, None):
             devnode = device.device_node
             print(f"📦 USB-Stick erkannt: {devnode}")
 
-            subprocess.Popen(['/usr/local/pi-backup/pi-backup.sh', devnode, "--systemd"])
+            subprocess.Popen(
+                ['/usr/local/pi-backup/pi-backup.sh', devnode, '--systemd'],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                preexec_fn=os.setsid  # eigener Prozessgruppe starten
+            )
