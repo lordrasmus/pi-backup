@@ -15,6 +15,12 @@ MOUNT_POINT="/mnt/backup"
 IS_SYSTEMD=false
 USBDEV="/dev/sda1"  # Standard-Device
 
+# 🛡️ Warnung, wenn nicht als Root ausgeführt
+if [[ "$EUID" -ne 0 ]]; then
+    echo "❌ Dieses Setup muss mit Root-Rechten ausgeführt werden (z. B. per: sudo run-last-pi-backup.sh )."
+    exit 1
+fi
+
 while [ $# -gt 0 ]; do
     case "$1" in
         --systemd)
@@ -36,7 +42,7 @@ done
 mkdir -p /tmp/piboot
 mount -t tmpfs -o size=10M tmpfs /tmp/piboot
 LOGFILE="/tmp/piboot/rpi-backup-$DATE.log"
-exec > >(tee -a "$LOGFILE") 2>&1
+exec > >(tee -a "$LOGFILE")
 
 echo ""
 echo "   PI Backup "$(cat /usr/local/pi-backup/vers) 
@@ -165,6 +171,7 @@ else
     done
 
 
+    
     if [ "$IS_SYSTEMD" = false ]; then
     
         if [ "$COMPRESSION_TYPE" = "gzip" ]; then
@@ -174,12 +181,13 @@ else
         fi
     else
         if [ "$COMPRESSION_TYPE" = "gzip" ]; then
-            dd if="$SRCDEV" bs=4M status=none | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
+            dd if="$SRCDEV" bs=4M status=progress | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
         else
-            dd if="$SRCDEV" bs=4M status=none | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+            dd if="$SRCDEV" bs=4M status=progress | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
         fi
     fi
 
+    
 
     # ----------- 📊 Backup-Infos -----------
 
