@@ -161,19 +161,19 @@ else
     find "$MOUNT_POINT" -name "rpi-backup-*.img.*" -type f -mtime +60 -exec rm -v {} \;
     
     # ----------- 🔒 Setze alle Partitionen auf readonly -----------
-    echo "🔒 Setze Partitionen auf readonly..."
+    #echo "🔒 Setze Partitionen auf readonly..."
     
     # Systemd in read-only Modus versetzen
     #echo "   Setze systemd auf read-only..."
     #systemctl rescue
     
     # Alle Mount-Points in umgekehrter Reihenfolge verarbeiten
-    for mnt in $(cat /proc/mounts | grep "$SRCDEV" | cut -d' ' -f2 | sort -r); do
-        if [ "$mnt" != "/tmp/piboot" ]; then
-            echo "   Setze $mnt auf readonly..."
-            mount -o remount,ro "$mnt" || true
-        fi
-    done
+    #for mnt in $(cat /proc/mounts | grep "$SRCDEV" | cut -d' ' -f2 | sort -r); do
+    #    if [ "$mnt" != "/tmp/piboot" ]; then
+    #        echo "   Setze $mnt auf readonly..."
+    #        mount -o remount,ro "$mnt" || true
+    #    fi
+    #done
     
     if [ "$IS_SYSTEMD" = false ]; then
         
