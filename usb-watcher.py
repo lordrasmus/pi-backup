@@ -23,9 +23,9 @@ for device in iter(monitor.poll, None):
 
             print("starte pi-backup.sh als background prozess")
             subprocess.Popen(
-            #f'nohup /usr/local/pi-backup/pi-backup.sh {devnode} --systemd &',
-            f'screen -S -- /usr/local/pi-backup/pi-backup.sh {devnode} --systemd',
-            shell=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
+                #f'nohup /usr/local/pi-backup/pi-backup.sh {devnode} --systemd &',
+                f'screen -S -- /usr/local/pi-backup/pi-backup.sh {devnode} --systemd',
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
