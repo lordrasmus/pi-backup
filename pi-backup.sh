@@ -23,6 +23,9 @@ echo ""
 
 echo "🔧 Script gestartet am $(date)"
 
+# Start-Benachrichtigung senden
+"$SCRIPT_DIR/send_log_mail.py" "🔧 Backup gestartet am $(date)"
+
 USBDEV="${1:-/dev/sda1}"
 
 

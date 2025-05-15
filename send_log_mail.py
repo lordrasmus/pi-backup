@@ -47,31 +47,42 @@ def ensure_config_exists():
     
     return config
 
+def send_mail(config, subject, content):
+    # E-Mail vorbereiten
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = config['SMTP']['sender']
+    msg['To'] = config['SMTP']['recipient']
+    msg.set_content(content)
+
+    try:
+        # E-Mail senden
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(config['SMTP']['server'], 
+                             int(config['SMTP']['port']), 
+                             context=context) as server:
+            server.login(config['SMTP']['sender'], 
+                        config['SMTP']['password'])
+            server.send_message(msg)
+    except smtplib.SMTPAuthenticationError as e:
+        print("❌ SMTP AuthenticationError")
+        print(e.smtp_error.decode())
+        sys.exit(1)
+
+    print("📧 E-Mail erfolgreich versendet.")
+
 # Konfiguration laden
 config = ensure_config_exists()
-LOGFILE = sys.argv[1]
 
-# E-Mail vorbereiten
-msg = EmailMessage()
-msg['Subject'] = '📦 Raspberry Pi Backup Log'
-msg['From'] = config['SMTP']['sender']
-msg['To'] = config['SMTP']['recipient']
-
-with open(LOGFILE, 'r') as f:
-    msg.set_content(f.read())
-
-try:
-    # E-Mail senden
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(config['SMTP']['server'], 
-                         int(config['SMTP']['port']), 
-                         context=context) as server:
-        server.login(config['SMTP']['sender'], 
-                    config['SMTP']['password'])
-        server.send_message(msg)
-except smtplib.SMTPAuthenticationError as e:
-    print("❌ SMTP AuthenticationError")
-    print(e.smtp_error.decode())
+if len(sys.argv) < 2:
+    print("❌ Bitte Logfile oder Nachricht als Parameter angeben")
     sys.exit(1)
 
-print("📧 Log-E-Mail erfolgreich versendet.")
+# Prüfen ob der Parameter ein existierendes Logfile ist
+if os.path.exists(sys.argv[1]):
+    # Logfile senden
+    with open(sys.argv[1], 'r') as f:
+        send_mail(config, '📦 Raspberry Pi Backup Log', f.read())
+else:
+    # Nachricht senden
+    send_mail(config, '🚀 Raspberry Pi Backup', sys.argv[1])
