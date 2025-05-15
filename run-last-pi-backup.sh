@@ -36,7 +36,9 @@ TAG=$(curl -s "$API_URL" | grep '"tag_name":' | cut -d '"' -f 4)
 
 if [ -z "$TAG" ]; then
     echo "❌ Konnte kein Release-Tag ermitteln. skip update"
-    
+    echo "$API_URL"
+    echo "$TAG"
+    curl -s "$API_URL"
 else
 
     CUR_VERS=""
