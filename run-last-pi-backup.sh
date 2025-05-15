@@ -108,7 +108,7 @@ if ! cmp -s "/usr/local/pi-backup/pi-backup.cron" "/etc/cron.hourly/pi-backup"; 
     echo "✅ PI Backup cron erfolgreich aktualisiert."
 fi
 
-chmod +x /etc/cron.hourly/pi-backup.cron
+chmod +x /etc/cron.hourly/pi-backup
 
 chmod +x "$SCRIPT_PATH"
 
