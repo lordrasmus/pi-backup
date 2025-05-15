@@ -119,7 +119,7 @@ case "$PI_MODEL" in
         #IMG_EXT="xz"
         
         COMPRESSION_TYPE="zstd"
-        COMPRESSION_LEVEL="4"
+        COMPRESSION_LEVEL="6"
         IMG_EXT="zstd"
         
         echo "🔍 Raspberry Pi 4 oder neuer erkannt, verwende $COMPRESSION_TYPE $COMPRESSION_LEVEL"
