@@ -26,5 +26,5 @@ for device in iter(monitor.poll, None):
                 ['/usr/local/pi-backup/pi-backup.sh', devnode, '--systemd'],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                preexec_fn=os.setsid  # eigener Prozessgruppe starten
+                start_new_session=True
             )
