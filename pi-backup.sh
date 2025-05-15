@@ -50,16 +50,11 @@ fi
 #fi
 
 
-# ----------- 🔒 Setze alle Partitionen auf readonly -----------
-echo "🔒 Setze Partitionen auf readonly..."
-for part in $(lsblk -n -o NAME $SRCDEV | tail -n +2); do
-    echo "   Setze /dev/$part auf readonly..."
-    mount -o remount,ro "/dev/$part"
-done
+
 
 # ----------- 🔐 Clean Exit sichern -----------
 
-trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true; echo "🔄 Starte System neu..."; reboot' EXIT
+trap 'echo "🔌 Unmounting..."; umount "$MOUNT_POINT" || true; if [ ! -e /skip-backup ]; then echo "🔄 Starte System neu..."; reboot; fi' EXIT
 
 echo "🔌 Mounting... $USBDEV -> $MOUNT_POINT"
 mkdir -p "$MOUNT_POINT"
@@ -131,6 +126,14 @@ else
     echo ""
     echo "🧹 Entferne Backups älter als 60 Tage..."
     find "$MOUNT_POINT" -name "rpi-backup-*.img.*" -type f -mtime +60 -exec rm -v {} \;
+    
+    # ----------- 🔒 Setze alle Partitionen auf readonly -----------
+    echo "🔒 Setze Partitionen auf readonly..."
+    for part in $(lsblk -n -o NAME $SRCDEV | tail -n +2); do
+        echo "   Setze /dev/$part auf readonly..."
+        mount -o remount,ro "/dev/$part"
+    done
+
 
     if [ "$IS_UDEV" = false ]; then
     
