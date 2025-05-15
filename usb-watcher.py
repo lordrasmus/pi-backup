@@ -21,7 +21,7 @@ for device in iter(monitor.poll, None):
             devnode = device.device_node
             print(f"📦 USB-Stick erkannt: {devnode}")
 
-            printf("starte pi-backup.sh als background prozess")
+            print("starte pi-backup.sh als background prozess")
             subprocess.Popen(
                 ['/usr/local/pi-backup/pi-backup.sh', devnode, '--systemd'],
                 stdout=subprocess.DEVNULL,
