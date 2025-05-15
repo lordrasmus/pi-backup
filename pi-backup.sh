@@ -89,6 +89,7 @@ mkdir -p "$MOUNT_POINT"
 mount "$USBDEV" "$MOUNT_POINT"
 
 DEST_PATH="$MOUNT_POINT/$IMG_FILE"
+TMP_DEST_PATH="${DEST_PATH}.tmp"
 
 # ----------- 🚀 Backup starten -----------
 
@@ -141,6 +142,7 @@ esac
 # Backup-Dateiname mit korrekter Endung
 IMG_FILE="rpi-backup-$DATE.img.$IMG_EXT"
 DEST_PATH="$MOUNT_POINT/$IMG_FILE"
+TMP_DEST_PATH="${DEST_PATH}.tmp"
 
 DEVICE_SIZE=$(blockdev --getsize64 "$SRCDEV")
 DEVICE_SIZE_MB=$((DEVICE_SIZE / 1024 / 1024))
@@ -152,16 +154,19 @@ else
     # ----------- 🧹 Alte Backups löschen -----------
 
     echo ""
+    echo "🧹 Entferne alte temporäre Backup-Dateien..."
+    find "$MOUNT_POINT" -name "rpi-backup-*.img.*.tmp" -type f -exec rm -v {} \;
+
     echo "🧹 Entferne Backups älter als 60 Tage..."
     find "$MOUNT_POINT" -name "rpi-backup-*.img.*" -type f -mtime +60 -exec rm -v {} \;
     
     # ----------- 🔒 Setze alle Partitionen auf readonly -----------
     echo "🔒 Setze Partitionen auf readonly..."
-
+    
     # Systemd in read-only Modus versetzen
     echo "   Setze systemd auf read-only..."
     systemctl rescue
-
+    
     # Alle Mount-Points in umgekehrter Reihenfolge verarbeiten
     for mnt in $(cat /proc/mounts | grep "$SRCDEV" | cut -d' ' -f2 | sort -r); do
         if [ "$mnt" != "/tmp/piboot" ]; then
@@ -169,25 +174,30 @@ else
             mount -o remount,ro "$mnt" || true
         fi
     done
-
-
     
     if [ "$IS_SYSTEMD" = false ]; then
-    
+        
         if [ "$COMPRESSION_TYPE" = "gzip" ]; then
-            pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
+            pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | gzip -$COMPRESSION_LEVEL -c > "$TMP_DEST_PATH"
         else
-            pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+            pv --progress --eta --size "$DEVICE_SIZE" "$SRCDEV" | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$TMP_DEST_PATH"
         fi
     else
         if [ "$COMPRESSION_TYPE" = "gzip" ]; then
-            dd if="$SRCDEV" bs=4M status=progress | gzip -$COMPRESSION_LEVEL -c > "$DEST_PATH"
+            dd if="$SRCDEV" bs=4M status=progress | gzip -$COMPRESSION_LEVEL -c > "$TMP_DEST_PATH"
         else
-            dd if="$SRCDEV" bs=4M status=progress | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$DEST_PATH"
+            dd if="$SRCDEV" bs=4M status=progress | $COMPRESSION_TYPE -$COMPRESSION_LEVEL -T0 > "$TMP_DEST_PATH"
         fi
     fi
-
     
+    # Wenn das Backup erfolgreich war, die .tmp Datei umbenennen
+    if [ $? -eq 0 ]; then
+        mv "$TMP_DEST_PATH" "$DEST_PATH"
+    else
+        echo "❌ Fehler beim Backup. Temporäre Datei wird gelöscht."
+        rm -f "$TMP_DEST_PATH"
+        exit 1
+    fi
 
     # ----------- 📊 Backup-Infos -----------
 
