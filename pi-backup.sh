@@ -151,7 +151,7 @@ else
     
     # ----------- 🔒 Setze alle Partitionen auf readonly -----------
     echo "🔒 Setze Partitionen auf readonly..."
-    for mnt in $(findmnt -n -o TARGET $SRCDEV); do
+    for mnt in $(cat /proc/mounts | grep "$SRCDEV" | cut -d' ' -f2); do
         if [ "$mnt" != "/tmp/piboot" ]; then
             echo "   Setze $mnt auf readonly..."
             mount -o remount,ro "$mnt"
