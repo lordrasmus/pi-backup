@@ -23,8 +23,7 @@ for device in iter(monitor.poll, None):
 
             print("starte pi-backup.sh als background prozess")
             subprocess.Popen(
-                ['/usr/local/pi-backup/pi-backup.sh', devnode, '--systemd'],
+                ['nohup', '/usr/local/pi-backup/pi-backup.sh', devnode, '--systemd'],
                 stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                start_new_session=True
+                stderr=subprocess.DEVNULL
             )
