@@ -1,8 +1,6 @@
 [Unit]
 Description=USB Backup Watcher
-DefaultDependencies=no
-After=basic.target rescue.target
-Before=shutdown.target
+After=network.target
 
 [Service]
 ExecStart=/usr/bin/python3 /usr/local/pi-backup/usb-watcher-run.py
@@ -10,4 +8,4 @@ Restart=always
 User=root
 
 [Install]
-WantedBy=rescue.target
+WantedBy=multi-user.target

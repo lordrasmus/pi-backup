@@ -164,8 +164,8 @@ else
     echo "🔒 Setze Partitionen auf readonly..."
     
     # Systemd in read-only Modus versetzen
-    echo "   Setze systemd auf read-only..."
-    systemctl rescue
+    #echo "   Setze systemd auf read-only..."
+    #systemctl rescue
     
     # Alle Mount-Points in umgekehrter Reihenfolge verarbeiten
     for mnt in $(cat /proc/mounts | grep "$SRCDEV" | cut -d' ' -f2 | sort -r); do
