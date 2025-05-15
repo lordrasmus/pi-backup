@@ -103,8 +103,8 @@ if [ ! -e /etc/systemd/system/multi-user.target.wants/usb-watcher.service ] ; th
     echo "✅ USB Watcher Service erfolgreich aktiviert."
 fi
 
-if ! cmp -s "/usr/local/pi-backup/pi-backup.cron" "/etc/cron.hourly/pi-backup.cron"; then
-    cp /usr/local/pi-backup/pi-backup.cron /etc/cron.hourly/
+if ! cmp -s "/usr/local/pi-backup/pi-backup.cron" "/etc/cron.hourly/pi-backup"; then
+    cp /usr/local/pi-backup/pi-backup.cron /etc/cron.hourly/pi-backup
     echo "✅ PI Backup cron erfolgreich aktualisiert."
 fi
 
